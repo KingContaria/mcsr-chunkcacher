@@ -13,7 +13,7 @@ public class TitleScreenMixin {
 
     @Inject(method = "init", at = @At("HEAD"))
     private void clearCacheOnAtumQuit(CallbackInfo ci) {
-        if (!Atum.isRunning || Atum.seed == null || Atum.seed.isEmpty()) {
+        if (!Atum.isRunning() || Atum.config.seed == null || Atum.config.seed.isEmpty()) {
             WorldCache.clearCache();
         }
     }

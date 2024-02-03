@@ -14,7 +14,7 @@
   "depends": {
     "fabricloader": ">=0.12.2",
     "minecraft": ">=1.16 <=1.17.1",
-    "atum": "*"
+    "atum": ">=2.0.0"
   },
   "breaks": {
     "lazystronghold": "*",

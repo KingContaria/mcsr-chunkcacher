@@ -26,7 +26,7 @@ public class WorldCache {
     }
 
     public static boolean shouldCache() {
-        return isGenerating && Atum.isRunning;
+        return isGenerating && Atum.isRunning();
     }
 
     public static NbtCompound getChunkNbt(ChunkPos chunkPos, ServerWorld world) {
