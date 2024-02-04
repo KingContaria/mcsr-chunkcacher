@@ -6,7 +6,6 @@
   "mixins": [
     "ChunkGeneratorMixin",
     "ChunkSerializerMixin",
-    "MinecraftServerMixin",
     "ThreadedAnvilChunkStorageMixin"
   ],
   "client": [
