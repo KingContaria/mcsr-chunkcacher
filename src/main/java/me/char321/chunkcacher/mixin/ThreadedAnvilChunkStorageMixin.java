@@ -26,7 +26,7 @@ public class ThreadedAnvilChunkStorageMixin {
 
     @Inject(method = "method_17225", at = @At("RETURN"), remap = false)
     private void addToCache(CallbackInfoReturnable<CompletableFuture<Either<Chunk, ChunkHolder.Unloaded>>> cir) {
-        if (WorldCache.shouldCache() && cir.getReturnValue().isDone()) {
+        if (this.world.getServer().getTicks() == 0 && WorldCache.shouldCache() && cir.getReturnValue().isDone()) {
             cir.getReturnValue().getNow(null).ifLeft((chunk) -> {
                 if (!chunk.getStatus().isAtLeast(ChunkStatus.FEATURES)) {
                     WorldCache.addChunk(chunk.getPos(), chunk, world);
@@ -37,7 +37,7 @@ public class ThreadedAnvilChunkStorageMixin {
 
     @ModifyVariable(method = "getUpdatedChunkNbt", at = @At("STORE"))
     private NbtCompound loadFromCache(NbtCompound nbtCompound, ChunkPos pos) {
-        if (WorldCache.shouldCache() && nbtCompound == null) {
+        if (this.world.getServer().getTicks() == 0 && WorldCache.shouldCache() && nbtCompound == null) {
             return WorldCache.getChunkNbt(pos, world);
         }
         return nbtCompound;
