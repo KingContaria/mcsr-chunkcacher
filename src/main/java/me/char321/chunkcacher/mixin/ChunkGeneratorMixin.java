@@ -10,6 +10,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Mixin(ChunkGenerator.class)
@@ -27,7 +29,7 @@ public class ChunkGeneratorMixin {
     @Inject(method = "generateStrongholdPositions", at = @At("TAIL"))
     private void cacheStrongholds(CallbackInfo ci) {
         if (WorldCache.shouldCache() && WorldCache.strongholdCache == null) {
-            WorldCache.strongholdCache = this.strongholds;
+            WorldCache.strongholdCache = Collections.unmodifiableList(new ArrayList<>(this.strongholds));
         }
     }
 }

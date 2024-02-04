@@ -32,6 +32,10 @@ dependencies {
     modImplementation libs.fabric.loader
     vineflowerDecompilerClasspath libs.vineflower
     modImplementation libs.atum
+
+    // we need this for Atum
+    // check for the latest versions at https://jitpack.io/#kingcontaria/speedrunapi
+    modImplementation "com.github.KingContaria:SpeedrunAPI:1d6ca1ffcd"
 }
 
 processResources {
