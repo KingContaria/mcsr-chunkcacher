@@ -1,4 +1,4 @@
-package me.char321.chunkcacher;
+package me.char321.chunkcacher.cache;
 
 import it.unimi.dsi.fastutil.longs.Long2ObjectLinkedOpenHashMap;
 import me.voidxwalker.autoreset.Atum;
@@ -10,6 +10,7 @@ import net.minecraft.world.ChunkSerializer;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.ChunkStatus;
+import net.minecraft.world.chunk.ProtoChunk;
 import net.minecraft.world.gen.GeneratorOptions;
 
 import java.util.ArrayList;
@@ -20,27 +21,28 @@ import java.util.Map;
 public class WorldCache {
     public static boolean isGenerating = false;
     private static GeneratorOptions lastGeneratorOptions;
-    private static final Map<RegistryKey<World>, List<Long2ObjectLinkedOpenHashMap<NbtCompound>>> cache = new HashMap<>();
+    private static final Map<RegistryKey<World>, List<Long2ObjectLinkedOpenHashMap<CachedChunk>>> cache = new HashMap<>();
     public static List<ChunkPos> strongholdCache;
 
     public static void addChunk(ChunkPos chunkPos, ChunkStatus status, Chunk chunk, ServerWorld world) {
         cache.computeIfAbsent(world.getRegistryKey(), k -> {
-            List<Long2ObjectLinkedOpenHashMap<NbtCompound>> list = new ArrayList<>();
+            List<Long2ObjectLinkedOpenHashMap<CachedChunk>> list = new ArrayList<>();
             for (int i = 0; i < 9; i++) {
                 list.add(new Long2ObjectLinkedOpenHashMap<>());
             }
             return list;
-        }).get(status.getIndex()).put(chunkPos.toLong(), ChunkSerializer.serialize(world, chunk));
+        }).get(status.getIndex()).put(chunkPos.toLong(), ChunkCacher.cache((ProtoChunk) chunk));
     }
 
     public static boolean shouldCache() {
         return isGenerating && Atum.isRunning;
     }
 
-    public static NbtCompound getChunkNbt(ChunkPos chunkPos, ChunkStatus status, ServerWorld world) {
-        List<Long2ObjectLinkedOpenHashMap<NbtCompound>> list = cache.get(world.getRegistryKey());
+    public static ProtoChunk getChunk(ChunkPos chunkPos, ChunkStatus status, ServerWorld world) {
+        List<Long2ObjectLinkedOpenHashMap<CachedChunk>> list = cache.get(world.getRegistryKey());
         if (list == null) return null;
-        return list.get(status.getIndex()).get(chunkPos.toLong());
+        CachedChunk cachedChunk = list.get(status.getIndex()).get(chunkPos.toLong());
+        return ChunkCacher.retrieve(cachedChunk, world);
     }
 
     /**

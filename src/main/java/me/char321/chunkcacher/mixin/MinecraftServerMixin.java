@@ -1,6 +1,6 @@
 package me.char321.chunkcacher.mixin;
 
-import me.char321.chunkcacher.WorldCache;
+import me.char321.chunkcacher.cache.WorldCache;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.SaveProperties;
 import org.spongepowered.asm.mixin.Final;

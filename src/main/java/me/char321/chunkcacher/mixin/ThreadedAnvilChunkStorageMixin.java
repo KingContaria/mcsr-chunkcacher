@@ -1,7 +1,7 @@
 package me.char321.chunkcacher.mixin;
 
 import com.mojang.datafixers.util.Either;
-import me.char321.chunkcacher.WorldCache;
+import me.char321.chunkcacher.cache.WorldCache;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.world.ChunkHolder;
 import net.minecraft.server.world.ServerLightingProvider;
@@ -11,6 +11,7 @@ import net.minecraft.structure.StructureManager;
 import net.minecraft.world.ChunkSerializer;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.ChunkStatus;
+import net.minecraft.world.chunk.ProtoChunk;
 import net.minecraft.world.gen.chunk.ChunkGenerator;
 import net.minecraft.world.poi.PointOfInterestStorage;
 import org.spongepowered.asm.mixin.Final;
@@ -35,6 +36,7 @@ public class ThreadedAnvilChunkStorageMixin {
     @Inject(method = "method_17225", at = @At("RETURN"), remap = false)
     private void addToCache(CallbackInfoReturnable<CompletableFuture<Either<Chunk, ChunkHolder.Unloaded>>> cir) {
         if (WorldCache.shouldCache() && cir.getReturnValue().isDone()) {
+            // TODO don't copy if already cached
             cir.getReturnValue().getNow(null).ifLeft((chunk) -> {
                 if (!chunk.getStatus().isAtLeast(ChunkStatus.FEATURES)) {
                     WorldCache.addChunk(chunk.getPos(), chunk.getStatus(), chunk, world);
@@ -55,17 +57,10 @@ public class ThreadedAnvilChunkStorageMixin {
     ) {
         if (WorldCache.shouldCache() && !instance.isAtLeast(ChunkStatus.FEATURES)) {
             Chunk chunk = surroundingChunks.get(surroundingChunks.size() / 2);
-            NbtCompound nbt = WorldCache.getChunkNbt(chunk.getPos(), instance, world);
-            if (nbt != null) {
-                return CompletableFuture.completedFuture(Either.left(ChunkSerializer.deserialize(
-                        world,
-                        structureManager,
-                        pointOfInterestStorage,
-                        chunk.getPos(),
-                        nbt
-                )));
+            ProtoChunk cachedChunk = WorldCache.getChunk(chunk.getPos(), instance, world);
+            if (cachedChunk != null) {
+                return CompletableFuture.completedFuture(Either.left(cachedChunk));
             }
-//            return WorldCache.getChunkNbt(pos, world);
         }
         return instance.runGenerationTask(world, chunkGenerator, structureManager, lightingProvider, function, surroundingChunks);
     }

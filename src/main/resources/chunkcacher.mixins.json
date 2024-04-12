@@ -5,9 +5,13 @@
   "compatibilityLevel": "JAVA_8",
   "mixins": [
     "ChunkGeneratorMixin",
-    "ChunkSerializerMixin",
     "MinecraftServerMixin",
-    "ThreadedAnvilChunkStorageMixin"
+    "ThreadedAnvilChunkStorageMixin",
+    "access.ChunkSectionAccessor",
+    "access.ChunkTickSchedulerAccessor",
+    "access.HeightmapAccessor",
+    "access.PackedIntegerArrayAccessor",
+    "access.ProtoChunkAccessor"
   ],
   "client": [
     "TitleScreenMixin"
