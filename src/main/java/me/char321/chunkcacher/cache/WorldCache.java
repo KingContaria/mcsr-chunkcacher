@@ -12,6 +12,7 @@ import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.ChunkStatus;
 import net.minecraft.world.chunk.ProtoChunk;
 import net.minecraft.world.gen.GeneratorOptions;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -31,13 +32,14 @@ public class WorldCache {
                 list.add(new Long2ObjectLinkedOpenHashMap<>());
             }
             return list;
-        }).get(status.getIndex()).put(chunkPos.toLong(), ChunkCacher.cache((ProtoChunk) chunk));
+        }).get(status.getIndex()).computeIfAbsent(chunkPos.toLong(), _pos -> ChunkCacher.cache((ProtoChunk) chunk));
     }
 
     public static boolean shouldCache() {
         return isGenerating && Atum.isRunning;
     }
 
+    @Nullable
     public static ProtoChunk getChunk(ChunkPos chunkPos, ChunkStatus status, ServerWorld world) {
         List<Long2ObjectLinkedOpenHashMap<CachedChunk>> list = cache.get(world.getRegistryKey());
         if (list == null) return null;
