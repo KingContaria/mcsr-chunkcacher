@@ -28,7 +28,7 @@ public class WorldCache {
     public static void addChunk(ChunkPos chunkPos, ChunkStatus status, Chunk chunk, ServerWorld world) {
         cache.computeIfAbsent(world.getRegistryKey(), k -> {
             List<Long2ObjectLinkedOpenHashMap<CachedChunk>> list = new ArrayList<>();
-            for (int i = 0; i < 9; i++) {
+            for (int i = 0; i < ChunkStatus.FEATURES.getIndex(); i++) {
                 list.add(new Long2ObjectLinkedOpenHashMap<>());
             }
             return list;
