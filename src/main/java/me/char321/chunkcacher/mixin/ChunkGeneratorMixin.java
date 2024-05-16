@@ -1,6 +1,6 @@
 package me.char321.chunkcacher.mixin;
 
-import me.char321.chunkcacher.WorldCache;
+import me.char321.chunkcacher.cache.WorldCache;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.gen.chunk.ChunkGenerator;
 import org.spongepowered.asm.mixin.Final;
