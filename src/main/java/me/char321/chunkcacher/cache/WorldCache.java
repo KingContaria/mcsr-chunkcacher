@@ -30,7 +30,7 @@ public class WorldCache {
                 list.add(new Long2ObjectLinkedOpenHashMap<>());
             }
             return list;
-        }).get(status.getIndex()).computeIfAbsent(chunkPos.toLong(), _pos -> ChunkCacher.cache((ProtoChunk) chunk));
+        }).get(status.getIndex()).computeIfAbsent(chunkPos.toLong(), _pos -> ChunkCacher.cache((ProtoChunk) chunk, world));
     }
 
     public static boolean shouldCache() {

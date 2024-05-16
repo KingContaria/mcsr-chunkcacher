@@ -22,12 +22,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 import java.util.function.Function;
 
 @Mixin(ThreadedAnvilChunkStorage.class)
 public class ThreadedAnvilChunkStorageMixin {
 
-    @Shadow @Final private ServerWorld world;
+    @Shadow @Final ServerWorld world;
 
     @Shadow @Final private PointOfInterestStorage pointOfInterestStorage;
 
@@ -42,9 +43,10 @@ public class ThreadedAnvilChunkStorageMixin {
         }
     }
 
-    @Redirect(method = "method_17225", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/chunk/ChunkStatus;runGenerationTask(Lnet/minecraft/server/world/ServerWorld;Lnet/minecraft/world/gen/chunk/ChunkGenerator;Lnet/minecraft/structure/StructureManager;Lnet/minecraft/server/world/ServerLightingProvider;Ljava/util/function/Function;Ljava/util/List;)Ljava/util/concurrent/CompletableFuture;"))
+    @Redirect(method = "method_17225", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/chunk/ChunkStatus;runGenerationTask(Ljava/util/concurrent/Executor;Lnet/minecraft/server/world/ServerWorld;Lnet/minecraft/world/gen/chunk/ChunkGenerator;Lnet/minecraft/structure/StructureManager;Lnet/minecraft/server/world/ServerLightingProvider;Ljava/util/function/Function;Ljava/util/List;)Ljava/util/concurrent/CompletableFuture;"))
     private CompletableFuture<Either<Chunk, ChunkHolder.Unloaded>> loadFromCache(
             ChunkStatus instance,
+            Executor executor,
             ServerWorld world,
             ChunkGenerator chunkGenerator,
             StructureManager structureManager,
@@ -59,6 +61,6 @@ public class ThreadedAnvilChunkStorageMixin {
                 return CompletableFuture.completedFuture(Either.left(cachedChunk));
             }
         }
-        return instance.runGenerationTask(world, chunkGenerator, structureManager, lightingProvider, function, surroundingChunks);
+        return instance.runGenerationTask(executor, world, chunkGenerator, structureManager, lightingProvider, function, surroundingChunks);
     }
 }

@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
 
 @SuppressWarnings("UnreachableCode")
 public class ChunkCacher {
-    public static CachedChunk cache(ProtoChunk chunk) {
+    public static CachedChunk cache(ProtoChunk chunk, ServerWorld world) {
         /*
         pos immutable
         biomes immutable
@@ -56,8 +56,8 @@ public class ChunkCacher {
         }
         res.sections = sections;
 
-        res.blockTickScheduler = copy(chunk.getBlockTickScheduler());
-        res.fluidTickScheduler = copy(chunk.getFluidTickScheduler());
+        res.blockTickScheduler = copy(chunk.getBlockTickScheduler(), world);
+        res.fluidTickScheduler = copy(chunk.getFluidTickScheduler(), world);
 
         res.heightmaps = cacheHeightmaps(chunk.getHeightmaps());
 
@@ -75,7 +75,7 @@ public class ChunkCacher {
             }
         }
 
-        res.structureStarts = cacheStructureStarts(chunk.getStructureStarts(), pos);
+        res.structureStarts = cacheStructureStarts(chunk.getStructureStarts(), pos, world);
         res.structureReferences = copyStructureReferences(chunk.getStructureReferences());
 
         res.inhabitedTime = chunk.getInhabitedTime();
@@ -97,7 +97,7 @@ public class ChunkCacher {
         if (chunk.upgradeData != UpgradeData.NO_UPGRADE_DATA) {
             throw new UnsupportedOperationException("caching upgrade data is not supported");
         }
-        ProtoChunk res = new ProtoChunk(pos, chunk.upgradeData, sections, copy(chunk.blockTickScheduler), copy(chunk.fluidTickScheduler));
+        ProtoChunk res = new ProtoChunk(pos, chunk.upgradeData, sections, copy(chunk.blockTickScheduler, world), copy(chunk.fluidTickScheduler, world), world);
 
         res.setBiomes(chunk.biomes);
 
@@ -117,7 +117,7 @@ public class ChunkCacher {
             }
         }
 
-        res.setStructureStarts(retrieveStructureStarts(chunk.structureStarts, world.getStructureManager(), world.getSeed()));
+        res.setStructureStarts(retrieveStructureStarts(chunk.structureStarts, world, world.getSeed()));
         res.setStructureReferences(copyStructureReferences(chunk.structureReferences));
 
         res.setInhabitedTime(chunk.inhabitedTime);
@@ -154,10 +154,10 @@ public class ChunkCacher {
         return res;
     }
 
-    private static <T> ChunkTickScheduler<T> copy(ChunkTickScheduler<T> src) {
+    private static <T> ChunkTickScheduler<T> copy(ChunkTickScheduler<T> src, ServerWorld world) {
         Predicate<T> shouldExclude = ((ChunkTickSchedulerAccessor<T>) src).getShouldExclude();
         ChunkPos pos = ((ChunkTickSchedulerAccessor<?>) src).getPos();
-        ChunkTickScheduler<T> res = new ChunkTickScheduler<>(shouldExclude, pos);
+        ChunkTickScheduler<T> res = new ChunkTickScheduler<>(shouldExclude, pos, world);
         ShortList[] reslists = ((ChunkTickSchedulerAccessor<T>) res).getScheduledPositions();
         ShortList[] lists = ((ChunkTickSchedulerAccessor<T>) src).getScheduledPositions();
 
@@ -225,20 +225,20 @@ public class ChunkCacher {
         return res;
     }
 
-    private static Map<StructureFeature<?>, NbtCompound> cacheStructureStarts(Map<StructureFeature<?>, StructureStart<?>> structureStarts, ChunkPos pos) {
+    private static Map<StructureFeature<?>, NbtCompound> cacheStructureStarts(Map<StructureFeature<?>, StructureStart<?>> structureStarts, ChunkPos pos, ServerWorld world) {
         Map<StructureFeature<?>, NbtCompound> res = new HashMap<>();
         for (Map.Entry<StructureFeature<?>, StructureStart<?>> entry : structureStarts.entrySet()) {
-            res.put(entry.getKey(), entry.getValue().toTag(pos.x, pos.z));
+            res.put(entry.getKey(), entry.getValue().toNbt(world, pos));
         }
         return res;
     }
 
-    private static Map<StructureFeature<?>, StructureStart<?>> retrieveStructureStarts(Map<StructureFeature<?>, NbtCompound> structureStarts, StructureManager structureManager, long worldSeed) {
+    private static Map<StructureFeature<?>, StructureStart<?>> retrieveStructureStarts(Map<StructureFeature<?>, NbtCompound> structureStarts, ServerWorld world, long worldSeed) {
         Map<StructureFeature<?>, StructureStart<?>> map = Maps.newHashMap();
 
         for(Map.Entry<StructureFeature<?>, NbtCompound> entry : structureStarts.entrySet()) {
             StructureFeature<?> structureFeature = entry.getKey();
-            StructureStart<?> structureStart = StructureFeature.readStructureStart(structureManager, entry.getValue(), worldSeed);
+            StructureStart<?> structureStart = StructureFeature.readStructureStart(world, entry.getValue(), worldSeed);
             if (structureStart == null) {
                 throw new IllegalArgumentException();
             }
