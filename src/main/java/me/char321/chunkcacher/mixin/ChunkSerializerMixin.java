@@ -1,7 +1,7 @@
 package me.char321.chunkcacher.mixin;
 
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtLongArray;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.LongArrayTag;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.world.ChunkSerializer;
 import net.minecraft.world.Heightmap;
@@ -17,12 +17,11 @@ import java.util.EnumSet;
 
 @Mixin(ChunkSerializer.class)
 public class ChunkSerializerMixin {
-
     @ModifyVariable(method = "serialize", at = @At("RETURN"), ordinal = 2)
-    private static NbtCompound serializeHeightmaps(NbtCompound nbtCompound, ServerWorld world, Chunk chunk) {
+    private static CompoundTag serializeHeightmaps(CompoundTag nbtCompound, ServerWorld world, Chunk chunk) {
         if (chunk instanceof ProtoChunk) {
-            nbtCompound.put(Heightmap.Type.WORLD_SURFACE_WG.getName(), new NbtLongArray(chunk.getHeightmap(Heightmap.Type.WORLD_SURFACE_WG).asLongArray()));
-            nbtCompound.put(Heightmap.Type.OCEAN_FLOOR_WG.getName(), new NbtLongArray(chunk.getHeightmap(Heightmap.Type.OCEAN_FLOOR_WG).asLongArray()));
+            nbtCompound.put(Heightmap.Type.WORLD_SURFACE_WG.getName(), new LongArrayTag(chunk.getHeightmap(Heightmap.Type.WORLD_SURFACE_WG).asLongArray()));
+            nbtCompound.put(Heightmap.Type.OCEAN_FLOOR_WG.getName(), new LongArrayTag(chunk.getHeightmap(Heightmap.Type.OCEAN_FLOOR_WG).asLongArray()));
         }
         return nbtCompound;
     }

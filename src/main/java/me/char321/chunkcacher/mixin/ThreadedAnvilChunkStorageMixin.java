@@ -2,7 +2,7 @@ package me.char321.chunkcacher.mixin;
 
 import com.mojang.datafixers.util.Either;
 import me.char321.chunkcacher.WorldCache;
-import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.world.ChunkHolder;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.server.world.ThreadedAnvilChunkStorage;
@@ -35,8 +35,8 @@ public class ThreadedAnvilChunkStorageMixin {
         }
     }
 
-    @ModifyVariable(method = "getUpdatedChunkNbt", at = @At("STORE"))
-    private NbtCompound loadFromCache(NbtCompound nbtCompound, ChunkPos pos) {
+    @ModifyVariable(method = "getUpdatedChunkTag", at = @At("STORE"))
+    private CompoundTag loadFromCache(CompoundTag nbtCompound, ChunkPos pos) {
         if (this.world.getServer().getTicks() == 0 && WorldCache.shouldCache() && nbtCompound == null) {
             return WorldCache.getChunkNbt(pos, world);
         }
