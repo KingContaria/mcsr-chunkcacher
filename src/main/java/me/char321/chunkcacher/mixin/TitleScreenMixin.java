@@ -1,7 +1,6 @@
 package me.char321.chunkcacher.mixin;
 
 import me.char321.chunkcacher.WorldCache;
-import me.voidxwalker.autoreset.Atum;
 import net.minecraft.client.gui.screen.TitleScreen;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -13,7 +12,7 @@ public class TitleScreenMixin {
 
     @Inject(method = "init", at = @At("HEAD"))
     private void clearCacheOnAtumQuit(CallbackInfo ci) {
-        if (!Atum.isRunning || Atum.seed == null || Atum.seed.isEmpty()) {
+        if (!WorldCache.shouldCache()) {
             WorldCache.clearCache();
         }
     }

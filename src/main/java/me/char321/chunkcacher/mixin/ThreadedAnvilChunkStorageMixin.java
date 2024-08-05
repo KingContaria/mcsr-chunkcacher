@@ -2,7 +2,7 @@ package me.char321.chunkcacher.mixin;
 
 import com.mojang.datafixers.util.Either;
 import me.char321.chunkcacher.WorldCache;
-import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.world.ChunkHolder;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.server.world.ThreadedAnvilChunkStorage;
@@ -26,7 +26,7 @@ public class ThreadedAnvilChunkStorageMixin {
 
     @Inject(method = "method_17225", at = @At("RETURN"), remap = false)
     private void addToCache(CallbackInfoReturnable<CompletableFuture<Either<Chunk, ChunkHolder.Unloaded>>> cir) {
-        if (WorldCache.shouldCache() && cir.getReturnValue().isDone()) {
+        if (this.world.getServer().getTicks() == 0 && WorldCache.shouldCache() && cir.getReturnValue().isDone()) {
             cir.getReturnValue().getNow(null).ifLeft((chunk) -> {
                 if (!chunk.getStatus().isAtLeast(ChunkStatus.FEATURES)) {
                     WorldCache.addChunk(chunk.getPos(), chunk, world);
@@ -35,9 +35,9 @@ public class ThreadedAnvilChunkStorageMixin {
         }
     }
 
-    @ModifyVariable(method = "getUpdatedChunkNbt", at = @At("STORE"))
-    private NbtCompound loadFromCache(NbtCompound nbtCompound, ChunkPos pos) {
-        if (WorldCache.shouldCache() && nbtCompound == null) {
+    @ModifyVariable(method = "getUpdatedChunkTag", at = @At("STORE"))
+    private CompoundTag loadFromCache(CompoundTag nbtCompound, ChunkPos pos) {
+        if (this.world.getServer().getTicks() == 0 && WorldCache.shouldCache() && nbtCompound == null) {
             return WorldCache.getChunkNbt(pos, world);
         }
         return nbtCompound;
