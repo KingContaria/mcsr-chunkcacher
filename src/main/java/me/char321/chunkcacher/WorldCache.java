@@ -23,7 +23,7 @@ public class WorldCache {
     }
 
     public static boolean shouldCache() {
-        return Atum.isRunning() && Atum.config.isSetSeed();
+        return Atum.isRunning() && Atum.isSetSeed();
     }
 
     public static CompoundTag getChunkNbt(ChunkPos chunkPos, ServerWorld world) {
