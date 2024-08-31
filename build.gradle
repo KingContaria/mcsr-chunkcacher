@@ -30,7 +30,11 @@ dependencies {
     mappings variantOf(libs.yarn.mappings) { classifier "v2" }
     modImplementation libs.fabric.loader
     vineflowerDecompilerClasspath libs.vineflower
-    modImplementation libs.atum
+
+    // check for the latest versions at https://jitpack.io/#kingcontaria/atum-rewrite
+    modImplementation ("com.github.KingContaria:atum-rewrite:c6eb3d183b") {
+        transitive = false
+    }
 
     // we need this for Atum
     // check for the latest versions at https://jitpack.io/#kingcontaria/speedrunapi
